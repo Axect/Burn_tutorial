@@ -1,14 +1,14 @@
 use burn::{
     module::Module,
     nn,
-    backend::WgpuBackend,
+    backend::Wgpu,
     tensor::Tensor, data::dataset::Dataset,
 };
 
-type Backend = WgpuBackend;
+type Backend = Wgpu;
 
 fn main() {
-
+    let x = Tensor::
 }
 
 #[derive(Module, Debug, Clone)]
@@ -26,5 +26,27 @@ impl MLP {
         let x = self.l2.forward(x);
         let x = self.gelu.forward(x);
         self.l3.forward(x)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct XYDataset {
+    x: Tensor<Backend, 1>,
+    y: Tensor<Backend, 1>,
+}
+
+impl XYDataset {
+    pub fn new(x: Vec<Tensor<Backend, 1>>, y: Vec<Tensor<Backend, 1>>) -> XYDataset {
+        XYDataset { x, y }
+    }
+}
+
+impl Dataset<(Tensor<Backend, 1>, Tensor<Backend, 1>)> for XYDataset {
+    fn get(&self, index: usize) -> Option<(Tensor<Backend, 1>, Tensor<Backend, 1>)> {
+        Some((self.x.select(0, index), self.y.select(0, index)))
+    }
+
+    fn len(&self) -> usize {
+        self.x.shape().num_elements()
     }
 }
